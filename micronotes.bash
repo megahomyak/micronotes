@@ -1,0 +1,20 @@
+#!/bin/bash
+mi() (
+    cd ~/micronotes # Wherever you want; this directory should contain a `key.bin`, which can be generated using `head -c 32 /dev/urandom > key.bin`
+    REMOTE_DIR="micronotes" # Wherever you want
+    REMOTE_CREDENTIALS="orange" # Whatever you have
+    LOCAL_FILE_PATH="$1"
+    if [ "$LOCAL_FILE_PATH" = "" ]
+    then
+        echo 'You forgot to provide the file path' >&2
+        exit
+    fi
+    enc() {
+        openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 "$@"
+    }
+    REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc -nosalt | basenc --base64url)"
+    REMOTE_FILE_PATH="$REMOTE_DIR/$REMOTE_FILE_NAME"
+    ssh "$REMOTE_CREDENTIALS" "mkdir -p $REMOTE_DIR && cat $REMOTE_FILE_PATH" | enc -d > "$LOCAL_FILE_PATH"
+    "$EDITOR" "$LOCAL_FILE_PATH"
+    cat "$LOCAL_FILE_PATH" | enc | ssh orange "cat > $REMOTE_FILE_PATH"
+)

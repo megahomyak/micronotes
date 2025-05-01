@@ -1,5 +1,6 @@
 #!/bin/bash
 mi() (
+    set -euo pipefail
     cd ~/micronotes # Wherever you want; this directory should contain a `key.bin`, which can be generated using `head -c 32 /dev/urandom > key.bin`
     REMOTE_DIR="micronotes" # Wherever you want
     REMOTE_CREDENTIALS="orange" # Whatever you have
@@ -15,7 +16,6 @@ mi() (
     REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc -nosalt | basenc --base64url)"
     REMOTE_FILE_PATH="$REMOTE_DIR/$REMOTE_FILE_NAME"
     TEMP_LOCAL_FILE_PATH="$(mktemp)"
-    set -o pipefail
     if ssh "$REMOTE_CREDENTIALS" "mkdir -p $REMOTE_DIR && cat $REMOTE_FILE_PATH" | enc -d > "$TEMP_LOCAL_FILE_PATH"
     then
         mv "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"

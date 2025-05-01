@@ -6,6 +6,7 @@ DEPENDENCIES:
 * bash (idk, maybe other shells will work too, haven't tested)
 * openssl
 * ssh
+* GNU coreutils (at least "basenc", "cat", "mktemp")
 
 INSTALLATION:
 1. Download `./micronotes.bash`

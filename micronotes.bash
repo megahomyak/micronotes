@@ -1,4 +1,3 @@
-#!/bin/bash
 mi() (
     set -euo pipefail
     cd ~/micronotes # Wherever you want; this directory should contain a `key.bin`, which can be generated using `head -c 32 /dev/urandom > key.bin`

@@ -9,8 +9,13 @@ DEPENDENCIES:
 * openssl
 * ssh
 
+INSTALLATION:
+1. Download `./micronotes.bash`
+2. Replace the values of parameter variables with the ones correct for you
+3. `source` the file into your `.bashrc` or what have you: `source /path/to/micronotes.bash`
+4. Don't forget to reload (likely, re-`source`) your shell's configuration, or just open a new shell
+
 USAGE:
-0. Ideally, `source` this into your `.bashrc`: `source /path/to/micronotes.bash`
 1. Execute `mi note-path` (`mi` taken from `micronotes.bash`) to start editing a note with path `note-path`. For example, `mi todo`
 2. The note will be downloaded from the remote server (if possible)
 3. Your editor will open. Edit the received note

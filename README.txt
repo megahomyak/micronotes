@@ -2,8 +2,6 @@ This is a dumb-simple Bash (?) script for managing a set of notes with synchroni
 
 File paths and file contents get encrypted with a key that you're supposed to share between your devices
 
-The script itself is in `./micronotes.bash`. Check the file out and edit the configuration parameters to include the values fit for *you*. This is mandatory
-
 DEPENDENCIES:
 * bash (idk, maybe other shells will work too, haven't tested)
 * openssl
@@ -13,7 +11,8 @@ INSTALLATION:
 1. Download `./micronotes.bash`
 2. Replace the values of parameter variables with the ones correct for you
 3. `source` the file into your `.bashrc` or what have you: `source /path/to/micronotes.bash`
-4. Don't forget to reload (likely, re-`source`) your shell's configuration, or just open a new shell
+4. Create the directory where your notes will be stored, and either generate a new encryption key into it (`head -c 32 /dev/urandom > key.bin`) or copy an existing one from your other device
+5. Don't forget to reload (likely, re-`source`) your shell's configuration, or just open a new shell
 
 USAGE:
 1. Execute `mi note-path` (`mi` taken from `micronotes.bash`) to start editing a note with path `note-path`. For example, `mi todo`

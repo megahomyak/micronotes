@@ -14,7 +14,12 @@ mi() (
     }
     REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc -nosalt | basenc --base64url)"
     REMOTE_FILE_PATH="$REMOTE_DIR/$REMOTE_FILE_NAME"
-    ssh "$REMOTE_CREDENTIALS" "mkdir -p $REMOTE_DIR && cat $REMOTE_FILE_PATH" | enc -d > "$LOCAL_FILE_PATH"
+    TEMP_LOCAL_FILE_PATH="$(mktemp)"
+    if ssh "$REMOTE_CREDENTIALS" "mkdir -p $REMOTE_DIR && cat $REMOTE_FILE_PATH" > "$TEMP_LOCAL_FILE_PATH"
+    then
+        cat "$TEMP_LOCAL_FILE_PATH" | enc -d > "$LOCAL_FILE_PATH"
+    fi
+    rm "$TEMP_LOCAL_FILE_PATH"
     "$EDITOR" "$LOCAL_FILE_PATH"
     cat "$LOCAL_FILE_PATH" | enc | ssh "$REMOTE_CREDENTIALS" "cat > $REMOTE_FILE_PATH"
 )

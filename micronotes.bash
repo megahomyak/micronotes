@@ -16,5 +16,5 @@ mi() (
     REMOTE_FILE_PATH="$REMOTE_DIR/$REMOTE_FILE_NAME"
     ssh "$REMOTE_CREDENTIALS" "mkdir -p $REMOTE_DIR && cat $REMOTE_FILE_PATH" | enc -d > "$LOCAL_FILE_PATH"
     "$EDITOR" "$LOCAL_FILE_PATH"
-    cat "$LOCAL_FILE_PATH" | enc | ssh orange "cat > $REMOTE_FILE_PATH"
+    cat "$LOCAL_FILE_PATH" | enc | ssh "$REMOTE_CREDENTIALS" "cat > $REMOTE_FILE_PATH"
 )

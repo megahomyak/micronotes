@@ -12,6 +12,6 @@ DEPENDENCIES:
 USAGE:
 0. Ideally, `source` this into your `.bashrc`: `source /path/to/micronotes.bash`
 1. Execute `mi note-path` (`mi` taken from `micronotes.bash`) to start editing a note with path `note-path`. For example, `mi todo`
-2. The note will be downloaded from the remote server
+2. The note will be downloaded from the remote server (if possible)
 3. Your editor will open. Edit the received note
 4. When you exit the editor, the note will be saved back to the server

@@ -1,9 +1,9 @@
-This is a dumb-simple Bash (?) script for managing a set of notes with synchronization through a remote server
+This is a dumb-simple Bash script for managing a set of notes with synchronization through a remote server
 
 File paths and file contents get encrypted with a key that you're supposed to share between your devices
 
 DEPENDENCIES:
-* bash (idk, maybe other shells will work too, haven't tested)
+* bash
 * openssl
 * ssh
 * GNU coreutils (at least "basenc", "cat", "mktemp")

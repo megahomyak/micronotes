@@ -1,52 +1,41 @@
-#!/bin/bash -euo pipefail
-LOCAL_FILE_PATH="$1"
-HELP_MESSAGE='Usage: ./micronotes.sh [NOTE PATH]
+#!/bin/bash
+set -euo pipefail
+LOCAL_FILE_PATH="${1:-}"
+if [[ "$LOCAL_FILE_PATH" == "" || "$LOCAL_FILE_PATH" == "-h" || "$LOCAL_FILE_PATH" == "--help" ]]; then
+    cat << EOF
+Usage: ./micronotes.sh [NOTE PATH]
 Edit a note file with synchronization through a central server.
 
-[NOTE PATH] is the path to your note relative to MICRONOTES_LOCAL_DIR. If no note with the specified path is present, one will be created.'
-check_all_parameter_presence() {
-    check_parameter_presence() {
+[NOTE PATH] is the path to your note relative to MICRONOTES_LOCAL_DIR. If no note with the specified path is present, one will be downloaded from the server if present there or created if not.
 
-    }
-    if [[ ! -v MICRONOTES_REMOTE_DIR ]] || [[ ! -v MICRONOTES_LOCAL_DIR ]] || [[ ! -v MICRONOTES_REMOTE_CREDENTIALS ]]; then
-        if [[ ! -v MICRONOTES_REMOTE_DIR ]]; then
-            echo 'MISSING PARAMETER `MICRONOTES_LOCAL_DIR`: responsible'
-        fi
-        exit
-    fi
-}
-if [[ "$LOCAL_FILE_PATH" == "" || "$LOCAL_FILE_PATH" == "-h" || "$LOCAL_FILE_PATH" == "--help" ]]; then
-    echo "$HELP_MESSAGE" >&2
-    check_all_parameter_presence
+After the note is downloaded, it will be opened in an editor and sent back to the server when you exit the editor.
+
+All the notes' contents and paths will be encrypted using a key in the "key.bin" file in MICRONOTES_LOCAL_DIR. You can create the file using "head -c 32 /dev/urandom > key.bin".
+
+Required environment variables:
+1. MICRONOTES_LOCAL_DIR - a path to a directory on your machine where the notes will be stored
+2. MICRONOTES_REMOTE_CREDENTIALS - a second argument to "ssh" to enter the remote synchronization server
+3. MICRONOTES_REMOTE_DIR - a directory on the synchronization server where the notes will be stored encrypted.
+EOF
     exit
 fi
-check_all_parameter_presence
+cd "$MICRONOTES_LOCAL_DIR"
 enc() {
     openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 "$@"
 }
-cd MICRONOTES_LOCAL_DIR
-mi() (
-    cd ~/micronotes # Wherever you want; this directory should contain a `key.bin`, which can be generated using `head -c 32 /dev/urandom > key.bin`
-    REMOTE_DIR="micronotes" # Wherever you want
-    REMOTE_CREDENTIALS="orange" # Whatever you have
-    LOCAL_FILE_PATH="$1"
-    if [ "$LOCAL_FILE_PATH" = "" ]
-    then
-        echo 'You forgot to provide the file path' >&2
-        exit
-    fi
-    enc() {
-        openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 "$@"
-    }
-    REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc -nosalt | basenc --base64url)"
-    REMOTE_FILE_PATH="$REMOTE_DIR/$REMOTE_FILE_NAME"
-    TEMP_LOCAL_FILE_PATH="$(mktemp)"
-    if ssh "$REMOTE_CREDENTIALS" "mkdir -p $REMOTE_DIR && cat $REMOTE_FILE_PATH" | enc -d > "$TEMP_LOCAL_FILE_PATH"
-    then
-        mv "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"
-    else
-        rm "$TEMP_LOCAL_FILE_PATH"
-    fi
-    "$EDITOR" "$LOCAL_FILE_PATH"
-    cat "$LOCAL_FILE_PATH" | enc | ssh "$REMOTE_CREDENTIALS" "cat > $REMOTE_FILE_PATH"
-)
+REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc -nosalt | basenc --base64url)"
+REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"
+TEMP_LOCAL_FILE_PATH="$(mktemp)"
+ssh_remote() {
+    ssh "$MICRONOTES_REMOTE_CREDENTIALS" "$@"
+}
+escape() {
+    printf '%q' "${!1}"
+}
+if ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat $(escape REMOTE_FILE_PATH)" | enc -d > "$TEMP_LOCAL_FILE_PATH"; then
+    mv "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"
+else
+    rm "$TEMP_LOCAL_FILE_PATH"
+fi
+"$EDITOR" "$LOCAL_FILE_PATH"
+cat "$LOCAL_FILE_PATH" | enc | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"

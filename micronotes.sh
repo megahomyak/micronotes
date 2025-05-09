@@ -10,7 +10,7 @@ Edit a note file with synchronization through a central server.
 
 After the note is downloaded, it will be opened in an editor and sent back to the server when you exit the editor.
 
-If you make the note empty while editing and exit the editor, the note will be deleted both locally and remotely.
+On the editing stage, if you make the note only contain whitespace characters and exit the editor, the note will be deleted both locally and remotely.
 
 All the notes' contents and paths will be encrypted using a key in the "key.bin" file in MICRONOTES_LOCAL_DIR. You can create the file using "head -c 32 /dev/urandom > key.bin".
 

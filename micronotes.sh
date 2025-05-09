@@ -25,13 +25,14 @@ cd "$MICRONOTES_LOCAL_DIR"
 enc() {
     openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 "$@"
 }
-enc_det() { # Deterministic, non-authenticated symmetrical encryption
+enc_det() { # Deterministic, non-authenticated symmetrical encryption. Reads from stdin, writes into stdout
     TODO
 }
-enc_ndet() { # Non-deterministic, authenticated symmetrical encryption
+enc_ndet() { # Non-deterministic, authenticated symmetrical encryption. Reads from stdin, writes into stdout
     TODO
 }
-dec() { # Decryption of output of enc_ndet()
+dec() { # Decryption of output of enc_ndet(). Reads from stdin, writes into file by path from $1
+    OUT_FILE_PATH="$1"
     TODO
 }
 REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url)"
@@ -43,7 +44,7 @@ ssh_remote() {
 escape() {
     printf '%q' "${!1}"
 }
-if ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat $(escape REMOTE_FILE_PATH)" | dec > "$TEMP_LOCAL_FILE_PATH"; then
+if ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat $(escape REMOTE_FILE_PATH)" | dec "$TEMP_LOCAL_FILE_PATH"; then
     mv "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"
 else
     rm "$TEMP_LOCAL_FILE_PATH"

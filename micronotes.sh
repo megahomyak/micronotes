@@ -10,6 +10,8 @@ Edit a note file with synchronization through a central server.
 
 After the note is downloaded, it will be opened in an editor and sent back to the server when you exit the editor.
 
+If you make the note empty while editing and exit the editor, the note will be deleted both locally and remotely.
+
 All the notes' contents and paths will be encrypted using a key in the "key.bin" file in MICRONOTES_LOCAL_DIR. You can create the file using "head -c 32 /dev/urandom > key.bin".
 
 Required environment variables:
@@ -38,12 +40,11 @@ else
     rm "$TEMP_LOCAL_FILE_PATH"
 fi
 "$EDITOR" "$LOCAL_FILE_PATH"
-FILE_LINES_COUNT="$(wc -l < "$LOCAL_FILE_PATH")"
-if [ -n "$FILE_LINES_COUNT+set" ]; then
-    if [ "$FILE_LINES_COUNT" -gt "1" ]; then
-        cat "$LOCAL_FILE_PATH" | enc | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"
-    else
+if [ -f "$LOCAL_FILE_PATH" ]; then
+    if gawk "NF { exit 1 }" "$LOCAL_FILE_PATH"; then
         rm "$LOCAL_FILE_PATH"
         ssh_remote "rm $(escape REMOTE_FILE_PATH)" || true
+    else
+        cat "$LOCAL_FILE_PATH" | enc | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"
     fi
 fi

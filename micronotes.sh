@@ -31,7 +31,7 @@ enc_det() { # Deterministic, non-authenticated symmetrical encryption
 enc_ndet() { # Non-deterministic, authenticated symmetrical encryption
     TODO
 }
-dec() { # Decryption of non-deterministically symmetrically encrypted data with authentication
+dec() { # Decryption of output of enc_ndet()
     TODO
 }
 REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url)"

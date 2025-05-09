@@ -38,4 +38,12 @@ else
     rm "$TEMP_LOCAL_FILE_PATH"
 fi
 "$EDITOR" "$LOCAL_FILE_PATH"
-cat "$LOCAL_FILE_PATH" | enc | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"
+FILE_LINES_COUNT="$(wc -l < "$LOCAL_FILE_PATH")"
+if [ -n "$FILE_LINES_COUNT+set" ]; then
+    if [ "$FILE_LINES_COUNT" -gt "1" ]; then
+        cat "$LOCAL_FILE_PATH" | enc | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"
+    else
+        rm "$LOCAL_FILE_PATH"
+        ssh_remote "rm $(escape REMOTE_FILE_PATH)" || true
+    fi
+fi

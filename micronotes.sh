@@ -25,7 +25,16 @@ cd "$MICRONOTES_LOCAL_DIR"
 enc() {
     openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 "$@"
 }
-REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc -nosalt | basenc --base64url)"
+enc_det() { # Deterministic, non-authenticated symmetrical encryption
+    TODO
+}
+enc_ndet() { # Non-deterministic, authenticated symmetrical encryption
+    TODO
+}
+dec() { # Decryption of non-deterministically symmetrically encrypted data with authentication
+    TODO
+}
+REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url)"
 REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"
 TEMP_LOCAL_FILE_PATH="$(mktemp)"
 ssh_remote() {
@@ -34,7 +43,7 @@ ssh_remote() {
 escape() {
     printf '%q' "${!1}"
 }
-if ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat $(escape REMOTE_FILE_PATH)" | enc -d > "$TEMP_LOCAL_FILE_PATH"; then
+if ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat $(escape REMOTE_FILE_PATH)" | dec > "$TEMP_LOCAL_FILE_PATH"; then
     mv "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"
 else
     rm "$TEMP_LOCAL_FILE_PATH"
@@ -45,6 +54,6 @@ if [ -f "$LOCAL_FILE_PATH" ]; then
         rm "$LOCAL_FILE_PATH"
         ssh_remote "rm $(escape REMOTE_FILE_PATH)" || true
     else
-        cat "$LOCAL_FILE_PATH" | enc | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"
+        cat "$LOCAL_FILE_PATH" | enc_ndet | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"
     fi
 fi

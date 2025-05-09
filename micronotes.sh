@@ -41,7 +41,7 @@ else
 fi
 "$EDITOR" "$LOCAL_FILE_PATH"
 if [ -f "$LOCAL_FILE_PATH" ]; then
-    if gawk "NF { exit 1 }" "$LOCAL_FILE_PATH"; then
+    if awk "NF { exit 1 }" "$LOCAL_FILE_PATH"; then
         rm "$LOCAL_FILE_PATH"
         ssh_remote "rm $(escape REMOTE_FILE_PATH)" || true
     else

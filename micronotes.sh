@@ -22,18 +22,15 @@ EOF
     exit
 fi
 cd "$MICRONOTES_LOCAL_DIR"
-enc() {
-    openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 "$@"
-}
 enc_det() { # Deterministic, non-authenticated symmetrical encryption. Reads from stdin, writes into stdout
-    TODO
+    openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 -nosalt
 }
 enc_ndet() { # Non-deterministic, authenticated symmetrical encryption. Reads from stdin, writes into stdout
-    TODO
+    gpg --batch --yes --passphrase "$(cat key.bin)" --symmetric --cipher-algo AES256
 }
 dec() { # Decryption of output of enc_ndet(). Reads from stdin, writes into file by path from $1
     OUT_FILE_PATH="$1"
-    TODO
+    gpg --quiet --batch --yes --passphrase "$(cat key.bin)" --output "$OUT_FILE_PATH"
 }
 REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url)"
 REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"

@@ -7,6 +7,7 @@ File paths and file contents get encrypted with a key that you're supposed to sh
 * openssl
 * ssh
 * awk
+* gpg
 * GNU coreutils (at least "basenc", "cat", "mktemp")
 
 # Installation

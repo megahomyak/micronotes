@@ -12,7 +12,7 @@ After the note is downloaded, it will be opened in an editor and sent back to th
 
 On the editing stage, if you make the note only contain whitespace characters or contain nothing and exit the editor, the note will be deleted both locally and remotely.
 
-All the notes' contents and paths will be encrypted using a key in the "key.bin" file in MICRONOTES_LOCAL_DIR. You can create the file using "head -c 32 /dev/urandom > key.bin".
+All the notes' contents and paths will be encrypted using a key in the "key.txt" file in MICRONOTES_LOCAL_DIR. You can create the file using "head -c 96 /dev/urandom | basenc --base64url --wrap 0 > key.txt".
 
 Required environment variables:
 1. MICRONOTES_LOCAL_DIR - a path to a directory on your machine where the notes will be stored
@@ -23,14 +23,14 @@ EOF
 fi
 cd "$MICRONOTES_LOCAL_DIR"
 enc_det() { # Deterministic, non-authenticated symmetrical encryption. Reads from stdin, writes into stdout
-    openssl enc -aes-256-cbc -pass file:key.bin -pbkdf2 -nosalt
+    openssl enc -aes-256-cbc -pass file:key.txt -pbkdf2 -nosalt
 }
 enc_ndet() { # Non-deterministic, authenticated symmetrical encryption. Reads from stdin, writes into stdout
-    gpg --batch --yes --passphrase "$(cat key.bin)" --symmetric --cipher-algo AES256
+    gpg --batch --yes --passphrase "$(cat key.txt)" --symmetric --cipher-algo AES256
 }
 dec() { # Decryption of output of enc_ndet(). Reads from stdin, writes into file by path from $1
     OUT_FILE_PATH="$1"
-    gpg --quiet --batch --yes --passphrase "$(cat key.bin)" --output "$OUT_FILE_PATH"
+    gpg --quiet --batch --yes --passphrase "$(cat key.txt)" --output "$OUT_FILE_PATH"
 }
 REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url)"
 REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"

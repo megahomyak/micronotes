@@ -18,6 +18,9 @@ Required environment variables:
 1. MICRONOTES_LOCAL_DIR - a path to a directory on your machine where the notes will be stored
 2. MICRONOTES_REMOTE_CREDENTIALS - a second argument to "ssh" to enter the remote synchronization server
 3. MICRONOTES_REMOTE_DIR - a directory on the synchronization server where the notes will be stored encrypted.
+
+Optional environment variables:
+1. MICRONOTES_CONNECT_TIMEOUT - seconds cap on each server connection (specifically connection, not data transfer). Default is 10
 EOF
     exit
 fi
@@ -36,7 +39,9 @@ REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url)"
 REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"
 TEMP_LOCAL_FILE_PATH="$(mktemp)"
 ssh_remote() {
-    ssh "$MICRONOTES_REMOTE_CREDENTIALS" "$@"
+    while ssh -o "ConnectTimeout=${MICRONOTES_CONNECT_TIMEOUT:-10}" "$MICRONOTES_REMOTE_CREDENTIALS" "$@"; [ $? = 255 ]; do
+        echo Reconnecting... >&2
+    done
 }
 escape() {
     printf '%q' "${!1}"

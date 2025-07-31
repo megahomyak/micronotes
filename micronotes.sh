@@ -35,7 +35,7 @@ dec() { # Decryption of output of enc_ndet(). Reads from stdin, writes into file
     OUT_FILE_PATH="$1"
     gpg --quiet --batch --yes --passphrase "$(cat key.txt)" --output "$OUT_FILE_PATH"
 }
-REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url)"
+REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url --wrap 0)"
 REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"
 TEMP_LOCAL_FILE_PATH="$(mktemp)"
 ssh_remote() {

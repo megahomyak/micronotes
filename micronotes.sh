@@ -37,26 +37,25 @@ dec() { # Decryption of output of enc_ndet(). Reads from stdin, writes into file
 }
 REMOTE_FILE_NAME="$(echo "$LOCAL_FILE_PATH" | enc_det | basenc --base64url --wrap 0)"
 REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"
-TEMP_LOCAL_FILE_PATH="$(mktemp)"
 ssh_remote() {
     while ssh -o "ConnectTimeout=${MICRONOTES_CONNECT_TIMEOUT:-10}" "$MICRONOTES_REMOTE_CREDENTIALS" "$@"; [ $? = 255 ]; do
         echo 'Reconnecting...' >&2
     done
 }
 escape() {
-    printf '%q' "${!1}"
+    printf '%q' "$1"
 }
-if ssh_remote "cat $(escape REMOTE_FILE_PATH)" | dec "$TEMP_LOCAL_FILE_PATH"; then
-    mv "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"
-else
-    rm "$TEMP_LOCAL_FILE_PATH"
-fi
+(trap 'rm -f "$TEMP_LOCAL_FILE_PATH"' EXIT; TEMP_LOCAL_FILE_PATH="$(mktemp)"
+    if ssh_remote "cat $(escape "$REMOTE_FILE_PATH")" | dec "$TEMP_LOCAL_FILE_PATH"; then
+        cp "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"
+    fi
+)
 "$EDITOR" "$LOCAL_FILE_PATH"
 if [ -f "$LOCAL_FILE_PATH" ]; then
     if awk "NF { exit 1 }" "$LOCAL_FILE_PATH"; then
         rm "$LOCAL_FILE_PATH"
-        ssh_remote "rm $(escape REMOTE_FILE_PATH)" || true
+        ssh_remote "rm $(escape "$REMOTE_FILE_PATH")" || true
     else
-        cat "$LOCAL_FILE_PATH" | enc_ndet | ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat > $(escape REMOTE_FILE_PATH)"
+        cat "$LOCAL_FILE_PATH" | enc_ndet | ssh_remote "mkdir -p $(escape "$MICRONOTES_REMOTE_DIR") && cat > $(escape "$REMOTE_FILE_PATH")"
     fi
 fi

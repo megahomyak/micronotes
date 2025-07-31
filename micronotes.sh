@@ -46,7 +46,7 @@ ssh_remote() {
 escape() {
     printf '%q' "${!1}"
 }
-if ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat $(escape REMOTE_FILE_PATH)" | dec "$TEMP_LOCAL_FILE_PATH"; then
+if ssh_remote "cat $(escape REMOTE_FILE_PATH)" | dec "$TEMP_LOCAL_FILE_PATH"; then
     mv "$TEMP_LOCAL_FILE_PATH" "$LOCAL_FILE_PATH"
 else
     rm "$TEMP_LOCAL_FILE_PATH"
@@ -57,6 +57,6 @@ if [ -f "$LOCAL_FILE_PATH" ]; then
         rm "$LOCAL_FILE_PATH"
         ssh_remote "rm $(escape REMOTE_FILE_PATH)" || true
     else
-        cat "$LOCAL_FILE_PATH" | enc_ndet | ssh_remote "cat > $(escape REMOTE_FILE_PATH)"
+        cat "$LOCAL_FILE_PATH" | enc_ndet | ssh_remote "mkdir -p $(escape MICRONOTES_REMOTE_DIR) && cat > $(escape REMOTE_FILE_PATH)"
     fi
 fi

@@ -40,7 +40,7 @@ REMOTE_FILE_PATH="$MICRONOTES_REMOTE_DIR/$REMOTE_FILE_NAME"
 TEMP_LOCAL_FILE_PATH="$(mktemp)"
 ssh_remote() {
     while ssh -o "ConnectTimeout=${MICRONOTES_CONNECT_TIMEOUT:-10}" "$MICRONOTES_REMOTE_CREDENTIALS" "$@"; [ $? = 255 ]; do
-        echo Reconnecting... >&2
+        echo 'Reconnecting...' >&2
     done
 }
 escape() {
